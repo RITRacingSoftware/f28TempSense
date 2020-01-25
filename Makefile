@@ -7,7 +7,8 @@ CC = /usr/local/CrossPack-AVR/bin/avr-gcc
 
 OBJCOPY = /usr/local/CrossPack-AVR/bin/avr-objcopy
 
-MODULES = $(SRC)ioport/
+MODULE_NAMES = adc ioport usart
+MODULES = $(foreach n, $(MODULE_NAMES), $(SRC)$n/)
 
 INCLUDE_DIRS = $(MODULES) $(INC)
 INC_PARAMS=$(foreach d, $(INCLUDE_DIRS), -I$d)
@@ -20,8 +21,9 @@ else
 endif
 
 CFLAGS += -mmcu=at90can128
+CFLAGS += --std=gnu99
 
-C_DEFINES = GCC_MEGA_AVR
+C_DEFINES = GCC_MEGA_AVR F_CPU=8000000
 C_DEFINE_PARAMS = $(foreach d, $(C_DEFINES), -D$d)
 
 all:	at90.hex
@@ -32,7 +34,7 @@ at90.hex: at90.elf
 at90.elf: *.o
 	$(CC) -mmcu=at90can128 $^ -o $@
 
-*.o: $(wildcard $(SRC)*.c) $(wildcard $(MODULES)*.c) $(SRC)portable/gcc/atmega323/port.c $(SRC)portable/mem_man/heap_1.c
+*.o: $(wildcard $(SRC)*.c) $(foreach n, $(MODULES), $(wildcard $n*.c)) $(SRC)portable/gcc/atmega323/port.c $(SRC)portable/mem_man/heap_1.c
 	$(CC) -c $(CFLAGS) $(C_DEFINE_PARAMS) $(INC_PARAMS) $^
 
 clean:

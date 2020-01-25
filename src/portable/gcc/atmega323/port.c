@@ -48,10 +48,10 @@ Changes from V2.6.0
 #define portFLAGS_INT_ENABLED					( ( StackType_t ) 0x80 )
 
 /* Hardware constants for timer 1. */
-#define portCLEAR_COUNTER_ON_MATCH				( ( uint8_t ) 0x08 )
-#define portPRESCALE_64							( ( uint8_t ) 0x03 )
-#define portCLOCK_PRESCALER						( ( uint32_t ) 64 )
-#define portCOMPARE_MATCH_A_INTERRUPT_ENABLE	( ( uint8_t ) 0x10 )
+#define portCLEAR_COUNTER_ON_MATCH				( ( unsigned portCHAR ) 0x08 )
+#define portPRESCALER							( ( unsigned portCHAR ) 0x03 )
+#define portCLOCK_PRESCALER						( ( unsigned portLONG ) 64 )
+#define portCOMPARE_MATCH_A_INTERRUPT_ENABLE	( ( unsigned portCHAR ) 0x02 )
 
 /*-----------------------------------------------------------*/
 
@@ -359,10 +359,10 @@ void vPortYieldFromTick( void )
 /*
  * Setup timer 1 compare match A to generate a tick interrupt.
  */
-static void prvSetupTimerInterrupt( void )
+void prvSetupTimerInterrupt( void )
 {
-uint32_t ulCompareMatch;
-uint8_t ucHighByte, ucLowByte;
+unsigned portLONG ulCompareMatch;
+unsigned portCHAR ucHighByte, ucLowByte;
 
 	/* Using 16bit timer 1 to generate the tick.  Correct fuses must be
 	selected for the configCPU_CLOCK_HZ clock. */
@@ -371,27 +371,26 @@ uint8_t ucHighByte, ucLowByte;
 
 	/* We only have 16 bits so have to scale to get our required tick rate. */
 	ulCompareMatch /= portCLOCK_PRESCALER;
+	ulCompareMatch -= 1; // count correction
 
-	/* Adjust for correct value. */
-	ulCompareMatch -= ( uint32_t ) 1;
 
 	/* Setup compare match value for compare match A.  Interrupts are disabled 
 	before this is called so we need not worry here. */
-	ucLowByte = ( uint8_t ) ( ulCompareMatch & ( uint32_t ) 0xff );
+	ucLowByte = ( unsigned portCHAR ) ( ulCompareMatch & ( unsigned portLONG ) 0xff );
 	ulCompareMatch >>= 8;
-	ucHighByte = ( uint8_t ) ( ulCompareMatch & ( uint32_t ) 0xff );
+	ucHighByte = ( unsigned portCHAR ) ( ulCompareMatch & ( unsigned portLONG ) 0xff );
 	OCR1AH = ucHighByte;
 	OCR1AL = ucLowByte;
 
 	/* Setup clock source and compare match behaviour. */
-	ucLowByte = portCLEAR_COUNTER_ON_MATCH | portPRESCALE_64;
+	ucLowByte = portCLEAR_COUNTER_ON_MATCH | portPRESCALER; // prescaler neu 64 portPRESCALE_256;
 	TCCR1B = ucLowByte;
 
 	/* Enable the interrupt - this is okay as interrupt are currently globally
 	disabled. */
-	ucLowByte = TIMSK0;
+	ucLowByte = TIMSK1;
 	ucLowByte |= portCOMPARE_MATCH_A_INTERRUPT_ENABLE;
-	TIMSK0 = ucLowByte;
+	TIMSK1 = ucLowByte;
 }
 /*-----------------------------------------------------------*/
 
