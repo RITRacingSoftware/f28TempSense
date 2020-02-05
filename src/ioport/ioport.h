@@ -11,6 +11,15 @@
 #include <stdint.h>
 #include <avr/io.h>
 
+/*
+ * Describes the location of a bit within a register.
+ */
+typedef struct
+{
+	volatile uint8_t* reg; // pointer to the register the bit is found in
+	uint8_t pos; // position of the bit in the register
+} bit_desc_S;
+
 #define write_port_a_data(value) write_port(&PORTA, value)
 #define write_port_a_direction(value) write_port(&DDRA, value)
 #define read_port_a_input() read_port(&PINA)
