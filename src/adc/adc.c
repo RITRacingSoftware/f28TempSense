@@ -24,8 +24,8 @@ void adc_init()
 	// Set the reference voltage
 	uint8_t admux = 0;
 
-	//admux &= ~(3 << REFS0);
-	admux |= (3 << REFS0);
+	// Select AVCC as the reference voltage
+	admux |= (1 << REFS0);
 	ADMUX = admux;
 
 	adcsra |= (1 << ADEN); // enable all of the ADC

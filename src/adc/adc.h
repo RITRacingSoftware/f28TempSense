@@ -10,6 +10,8 @@
 
 #include <stdint.h>
 
+#define MAX_ADC_VALUE 1023
+
 void adc_init();
 
 void adc_begin_conversion(uint8_t channel);

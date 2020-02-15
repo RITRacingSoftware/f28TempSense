@@ -7,7 +7,7 @@ CC = /usr/local/CrossPack-AVR/bin/avr-gcc
 
 OBJCOPY = /usr/local/CrossPack-AVR/bin/avr-objcopy
 
-MODULE_NAMES = adc ioport usart multiplex sn74lv4051a
+MODULE_NAMES = adc ioport usart multiplex sn74lv4051a thermistor
 MODULES = $(foreach n, $(MODULE_NAMES), $(SRC)$n/)
 
 INCLUDE_DIRS = $(MODULES) $(INC)
@@ -22,6 +22,10 @@ endif
 
 CFLAGS += -mmcu=at90can128
 CFLAGS += --std=gnu99
+CFLAGS += -lm
+CFLAGS += -u
+CFLAGS += vfprintf
+CFLAGS += -lprintf_flt
 
 C_DEFINES = GCC_MEGA_AVR F_CPU=8000000
 C_DEFINE_PARAMS = $(foreach d, $(C_DEFINES), -D$d)
@@ -32,7 +36,7 @@ at90.hex: at90.elf
 	$(OBJCOPY) -O ihex -j .text -j .data at90.elf at90.hex
 
 at90.elf: *.o
-	$(CC) -mmcu=at90can128 $^ -o $@
+	$(CC) -mmcu=at90can128 $^ -o $@ $(CFLAGS)
 
 *.o: $(wildcard $(SRC)*.c) $(foreach n, $(MODULES), $(wildcard $n*.c)) $(SRC)portable/gcc/atmega323/port.c $(SRC)portable/mem_man/heap_1.c
 	$(CC) -c $(CFLAGS) $(C_DEFINE_PARAMS) $(INC_PARAMS) $^

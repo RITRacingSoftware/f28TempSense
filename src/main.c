@@ -10,6 +10,7 @@
 #include "usart.h"
 #include "adc.h"
 #include "multiplex.h"
+#include "thermistor.h"
 
 #define PING_ALIVE_TASK_NAME ((signed char *) "PING_ALIVE")
 #define PING_ALIVE_TASK_FREQUENCY 10000
@@ -23,7 +24,7 @@ void ping_alive_task(void *pvParameters)
 	xLastWakeTime = xTaskGetTickCount();
 	uint16_t iteration_count = 0;
 
-	usart_0_init(1, 0);
+	usart_0_print_string("Ping Alive Task Start!\n");
 
 	for(;;)
 	{
@@ -62,6 +63,7 @@ void sample_task(void *pvParameters)
 	adc_semaphore = xSemaphoreCreateBinary();
 	adc_begin_conversion(0);
 	static uint8_t selected_thermistor = 0;
+	usart_0_print_string("Sample Task Start!\n");
 
 	for(;;)
 	{
@@ -69,9 +71,10 @@ void sample_task(void *pvParameters)
 		xSemaphoreTake(adc_semaphore, portMAX_DELAY);
 
 		uint16_t latest_adc_reading = adc_get_latest_conversion_result();
+		double volts = ((double)latest_adc_reading/((float)MAX_ADC_VALUE)) * 5.0;
 
 		char str[50];
-		sprintf(str, "thermistor %d: %d\n", selected_thermistor, latest_adc_reading);
+		sprintf(str, "thermistor %d: %lf volts: %lf adc: %d\n", selected_thermistor, thermistor_volts_to_deg_c(volts), volts, latest_adc_reading);
 		usart_0_print_string(str);
 
 		selected_thermistor = (selected_thermistor + 1) % NUM_THERM;
@@ -82,6 +85,7 @@ void sample_task(void *pvParameters)
 
 		uint8_t cluster = selected_thermistor / 8;
 		multiplex_select_thermistor(cluster, selected_thermistor - (cluster * 8));
+		//multiplex_select_thermistor(0, 3);
 		vTaskDelay(100); // delay to let mux propagate
 
 		uint8_t adc_channel;
@@ -107,6 +111,8 @@ int main(int argc, char **argv)
 	multiplex_init();
 
 	usart_0_init(1,0);
+
+	usart_0_print_string("Device Initialization Complete!\n");
 
 	//xTaskCreate(ping_alive_task, PING_ALIVE_TASK_NAME, PING_ALIVE_TASK_STACK_SIZE, NULL, PING_ALIVE_TASK_PRIORITY, NULL);
 	xTaskCreate(sample_task, SAMPLE_TASK_NAME, SAMPLE_TASK_STACK_SIZE, NULL, SAMPLE_TASK_PRIORITY, NULL);
