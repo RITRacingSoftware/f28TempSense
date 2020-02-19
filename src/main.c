@@ -11,31 +11,8 @@
 #include "adc.h"
 #include "multiplex.h"
 #include "thermistor.h"
-
-#define PING_ALIVE_TASK_NAME ((signed char *) "PING_ALIVE")
-#define PING_ALIVE_TASK_FREQUENCY 10000
-#define PING_ALIVE_TASK_STACK_SIZE 256
-#define PING_ALIVE_TASK_PRIORITY tskIDLE_PRIORITY
-
-void ping_alive_task(void *pvParameters)
-{
-	portTickType xLastWakeTime;
-	const portTickType xFrequency = PING_ALIVE_TASK_FREQUENCY;
-	xLastWakeTime = xTaskGetTickCount();
-	uint16_t iteration_count = 0;
-
-	usart_0_print_string("Ping Alive Task Start!\n");
-
-	for(;;)
-	{
-		char str[50];
-		sprintf(str, "Ping Alive: %d\n", iteration_count);
-		usart_0_print_string(str);
-		iteration_count++;
-
-		vTaskDelayUntil(&xLastWakeTime, xFrequency);
-	}
-}
+#include "temp_data.h"
+#include "temp_monitor.h"
 
 SemaphoreHandle_t adc_semaphore = NULL;
 ISR(ADC_vect)
@@ -53,8 +30,7 @@ ISR(ADC_vect)
 	}
 }
 
-#define SAMPLE_TASK_NAME ((signed char *) "PING_ALIVE")
-#define SAMPLE_TASK_FREQUENCY 1000
+#define SAMPLE_TASK_NAME ((signed char *) "SAMPLE")
 #define SAMPLE_TASK_STACK_SIZE 256
 #define SAMPLE_TASK_PRIORITY (tskIDLE_PRIORITY + 1)
 
@@ -73,9 +49,12 @@ void sample_task(void *pvParameters)
 		uint16_t latest_adc_reading = adc_get_latest_conversion_result();
 		double volts = ((double)latest_adc_reading/((float)MAX_ADC_VALUE)) * 5.0;
 
-		char str[50];
-		sprintf(str, "thermistor %d: %lf volts: %lf adc: %d\n", selected_thermistor, thermistor_volts_to_deg_c(volts), volts, latest_adc_reading);
-		usart_0_print_string(str);
+		double deg_c = thermistor_volts_to_deg_c(volts);
+		temp_data_update(selected_thermistor, deg_c);
+
+//		char str[50];
+//		sprintf(str, "thermistor %d: %lf volts: %lf adc: %d\n", selected_thermistor, deg_c, volts, latest_adc_reading);
+//		usart_0_print_string(str);
 
 		selected_thermistor = (selected_thermistor + 1) % NUM_THERM;
 		if (selected_thermistor == 24)
@@ -85,8 +64,7 @@ void sample_task(void *pvParameters)
 
 		uint8_t cluster = selected_thermistor / 8;
 		multiplex_select_thermistor(cluster, selected_thermistor - (cluster * 8));
-		//multiplex_select_thermistor(0, 3);
-		vTaskDelay(100); // delay to let mux propagate
+		vTaskDelay(20); // delay to let mux propagate
 
 		uint8_t adc_channel;
 		switch(cluster)
@@ -105,17 +83,48 @@ void sample_task(void *pvParameters)
 	}
 }
 
+#define MONITOR_TASK_NAME ((signed char *) "MONITOR")
+#define MONITOR_TASK_PERIOD 1000
+#define MONITOR_TASK_STACK_SIZE 256
+#define MONITOR_TASK_PRIORITY (tskIDLE_PRIORITY + 1)
+
+void monitor_task(void *pvParameters)
+{
+	portTickType xLastWakeTime;
+	const portTickType xPeriod = MONITOR_TASK_PERIOD;
+	xLastWakeTime = xTaskGetTickCount();
+
+	usart_0_print_string("Monitor Task Start!\n");
+
+	for(;;)
+	{
+		temp_monitor_update();
+
+		unsigned int hottest_index, coldest_index;
+		double hottest_temp, coldest_temp;
+		temp_monitor_hottest(&hottest_temp, &hottest_index);
+		temp_monitor_coldest(&coldest_temp, &coldest_index);
+
+		char buf[100];
+		sprintf(buf, "Hottest is #%d at %lf deg C\nColdest is #%d at %lf deg C\n", hottest_index, hottest_temp, coldest_index, coldest_temp);
+		usart_0_print_string(buf);
+
+		vTaskDelayUntil(&xLastWakeTime, xPeriod);
+	}
+}
+
 int main(int argc, char **argv)
 {
 	adc_init();
 	multiplex_init();
+	temp_data_init();
 
 	usart_0_init(1,0);
 
 	usart_0_print_string("Device Initialization Complete!\n");
 
-	//xTaskCreate(ping_alive_task, PING_ALIVE_TASK_NAME, PING_ALIVE_TASK_STACK_SIZE, NULL, PING_ALIVE_TASK_PRIORITY, NULL);
 	xTaskCreate(sample_task, SAMPLE_TASK_NAME, SAMPLE_TASK_STACK_SIZE, NULL, SAMPLE_TASK_PRIORITY, NULL);
+	xTaskCreate(monitor_task, MONITOR_TASK_NAME, MONITOR_TASK_STACK_SIZE, NULL, MONITOR_TASK_PRIORITY, NULL);
 
 	vTaskStartScheduler();
 	return 0;

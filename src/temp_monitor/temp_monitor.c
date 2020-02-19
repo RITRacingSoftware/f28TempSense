@@ -1,0 +1,74 @@
+/*
+ * temp_monitor.c
+ *
+ *  Created on: Feb 15, 2020
+ *      Author: chrisblust
+ */
+
+#include "temp_data.h"
+#include "fault_status.h"
+#include "temp_monitor.h"
+#include "multiplex.h"
+#include <stdint.h>
+
+static double coldest_temp, hottest_temp;
+static unsigned int coldest_index, hottest_index;
+
+void temp_monitor_update(void)
+{
+	// don't want the static values changing while being calculated
+	double new_coldest_temp = 1000;
+	double new_hottest_temp = -1000;
+	unsigned int new_coldest_index, new_hottest_index;
+
+	for (uint8_t i = 0; i < NUM_THERM; i++)
+	{
+		double temp = temp_data_get(i);
+
+		if (temp < new_coldest_temp)
+		{
+			new_coldest_temp = temp;
+			new_coldest_index = i;
+		}
+		else if (temp > new_hottest_temp)
+		{
+			new_hottest_temp = temp;
+			new_hottest_index = i;
+		}
+
+		if (temp > OVERTEMP_SET_DEG_C)
+		{
+			fault_status_set_therm_overtemp(i);
+		}
+		else if (temp < OVERTEMP_CLEAR_DEG_C)
+		{
+			fault_status_clear_therm_overtemp(i);
+		}
+
+		if (temp < IRRATIONAL_SET_DEG_C)
+		{
+			fault_status_set_therm_irrational(i);
+		}
+		else if (temp > IRRATIONAL_CLEAR_DEG_C)
+		{
+			fault_status_clear_therm_irrational(i);
+		}
+	}
+
+	coldest_temp = new_coldest_temp;
+	coldest_index = new_coldest_index;
+	hottest_temp = new_hottest_temp;
+	hottest_index = new_hottest_index;
+}
+
+void temp_monitor_hottest(double* temp, unsigned int* index)
+{
+	*temp = hottest_temp;
+	*index = hottest_index;
+}
+
+void temp_monitor_coldest(double* temp, unsigned int* index)
+{
+	*temp = coldest_temp;
+	*index = coldest_index;
+}
