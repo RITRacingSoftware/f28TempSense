@@ -12,7 +12,6 @@
 #define MIN(a,b) (a < b ? a : b)
 #define SAT(input, min, max) (MAX(MIN(input,max), min))
 
-#define BIT_SET(reg, pos, val) (*((uint8_t*)reg) = (*((uint8_t*)reg) & ~(1 << pos)) | (val << pos))
-#define BIT_SEL(reg, pos) ((*((uint8_t*)reg) & (1 << pos)) >> pos)
+#define BIT(pos) (1 << pos)
 
 #endif /* COMMON_MACROS_H */

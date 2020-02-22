@@ -5,6 +5,7 @@
  *      Author: chrisblust
  */
 
+#include "config.h"
 #include "temp_data.h"
 #include "fault_status.h"
 #include "temp_monitor.h"
@@ -38,20 +39,20 @@ void temp_monitor_update(void)
 
 		if (temp > OVERTEMP_SET_DEG_C)
 		{
-			fault_status_set_therm_overtemp(i);
+			fault_status_set_therm_overtemp();
 		}
 		else if (temp < OVERTEMP_CLEAR_DEG_C)
 		{
-			fault_status_clear_therm_overtemp(i);
+			fault_status_clear_therm_overtemp();
 		}
 
 		if (temp < IRRATIONAL_SET_DEG_C)
 		{
-			fault_status_set_therm_irrational(i);
+			fault_status_set_therm_irrational();
 		}
 		else if (temp > IRRATIONAL_CLEAR_DEG_C)
 		{
-			fault_status_clear_therm_irrational(i);
+			fault_status_clear_therm_irrational();
 		}
 	}
 
@@ -59,6 +60,34 @@ void temp_monitor_update(void)
 	coldest_index = new_coldest_index;
 	hottest_temp = new_hottest_temp;
 	hottest_index = new_hottest_index;
+
+	// Determine if a fault should be set
+
+	if (config_rationality_check_enabled())
+	{
+		if (coldest_temp < IRRATIONAL_SET_DEG_C)
+		{
+			fault_status_set_therm_irrational();
+		}
+		else if (coldest_temp > IRRATIONAL_CLEAR_DEG_C)
+		{
+			fault_status_clear_therm_irrational();
+		}
+	}
+
+	if (config_temp_monitoring_enabled())
+	{
+		if (hottest_temp > OVERTEMP_SET_DEG_C)
+		{
+			fault_status_set_therm_overtemp();
+		}
+		else if (hottest_temp < OVERTEMP_CLEAR_DEG_C)
+		{
+			fault_status_clear_therm_overtemp();
+		}
+	}
+
+
 }
 
 void temp_monitor_hottest(double* temp, unsigned int* index)

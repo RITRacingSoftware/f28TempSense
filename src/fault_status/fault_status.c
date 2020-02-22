@@ -6,44 +6,34 @@
  */
 #include "fault_status.h"
 
-static uint32_t overtemp_bit_array;
-static uint32_t irrational_bit_array;
+static int overtemp = 0;
+static int irrational = 0;
 
-uint8_t fault_status_get_therm_overtemp(uint8_t index)
+int fault_status_get_overtemp(void)
 {
-	return (overtemp_bit_array & (1 << index)) != 0;
+	return overtemp;
 }
 
-uint8_t fault_status_get_therm_irrational(uint8_t index)
+int fault_status_get_irrational(void)
 {
-	return (irrational_bit_array & (1 << index)) != 0;
+	return irrational;
 }
 
-uint8_t fault_status_get_overtemp(void)
+void fault_status_set_therm_overtemp(void)
 {
-	return overtemp_bit_array != 0;
+	overtemp = 1;
+}
+void fault_status_set_therm_irrational(void)
+{
+	irrational = 1;
 }
 
-uint8_t fault_status_get_irrational(void)
+void fault_status_clear_therm_overtemp(void)
 {
-	return irrational_bit_array != 0;
+	overtemp = 0;
 }
 
-void fault_status_set_therm_overtemp(uint8_t index)
+void fault_status_clear_therm_irrational(void)
 {
-	overtemp_bit_array |= (1 << index);
-}
-void fault_status_set_therm_irrational(uint8_t index)
-{
-	irrational_bit_array |= (1 << index);
-}
-
-void fault_status_clear_therm_overtemp(uint8_t index)
-{
-	overtemp_bit_array &= ~(1 << index);
-}
-
-void fault_status_clear_therm_irrational(uint8_t index)
-{
-	irrational_bit_array &= ~(1 << index);
+	irrational = 0;
 }

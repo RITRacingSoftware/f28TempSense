@@ -13,6 +13,7 @@
 #include "thermistor.h"
 #include "temp_data.h"
 #include "temp_monitor.h"
+#include "shutdown_control.h"
 
 SemaphoreHandle_t adc_semaphore = NULL;
 ISR(ADC_vect)
@@ -110,6 +111,12 @@ void monitor_task(void *pvParameters)
 		usart_0_print_string(buf);
 
 		vTaskDelayUntil(&xLastWakeTime, xPeriod);
+		static int i = 0;
+		if (i == 0)
+			shutdown_control_trigger_shutdown();
+		else
+			shutdown_control_clear_shutdown();
+		i ^= 1;
 	}
 }
 
@@ -118,6 +125,7 @@ int main(int argc, char **argv)
 	adc_init();
 	multiplex_init();
 	temp_data_init();
+	shutdown_control_init();
 
 	usart_0_init(1,0);
 

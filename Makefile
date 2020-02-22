@@ -7,7 +7,7 @@ CC = /usr/local/CrossPack-AVR/bin/avr-gcc
 
 OBJCOPY = /usr/local/CrossPack-AVR/bin/avr-objcopy
 
-MODULE_NAMES = adc ioport usart multiplex sn74lv4051a thermistor temp_data temp_monitor fault_status
+MODULE_NAMES = adc ioport usart multiplex sn74lv4051a thermistor temp_data temp_monitor fault_status shutdown_control config
 MODULES = $(foreach n, $(MODULE_NAMES), $(SRC)$n/)
 
 INCLUDE_DIRS = $(MODULES) $(INC)

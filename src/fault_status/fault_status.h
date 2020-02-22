@@ -8,18 +8,13 @@
 #ifndef FAULT_STATUS_H
 #define FAULT_STATUS_H
 
-#include <stdint.h>
+int fault_status_get_irrational(void);
+int fault_status_get_overtemp(void);
 
-uint8_t fault_status_get_therm_overtemp(uint8_t index);
-uint8_t fault_status_get_therm_irrational(uint8_t index);
+void fault_status_set_therm_overtemp(void);
+void fault_status_set_therm_irrational(void);
 
-uint8_t fault_status_get_irrational(void);
-uint8_t fault_status_get_overtemp(void);
-
-void fault_status_set_therm_overtemp(uint8_t index);
-void fault_status_set_therm_irrational(uint8_t index);
-
-void fault_status_clear_therm_overtemp(uint8_t index);
-void fault_status_clear_therm_irrational(uint8_t index);
+void fault_status_clear_therm_overtemp(void);
+void fault_status_clear_therm_irrational(void);
 
 #endif /* FAULT_STATUS_H */
