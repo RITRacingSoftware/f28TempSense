@@ -10,11 +10,12 @@
 #include "adc.h"
 
 #define ADC_PRESCALE 0x06
+static double conversion_result_volts;
 
 /**
  * Initialize the ADC registers and enable the ADC.
  */
-void adc_init()
+void adc_init(void)
 {
 	uint8_t adcsra = ADCSRA;
 
@@ -33,6 +34,12 @@ void adc_init()
 	adcsra |= (ADC_PRESCALE & 0x3); // set the prescaler to the first 3 bits of prescale
 
 	ADCSRA = adcsra;
+}
+
+void adc_sample_procedure(void)
+{
+	uint16_t latest_adc_reading = adc_get_conversion_result();
+	conversion_result_volts = ((double)latest_adc_reading/((float)MAX_ADC_VALUE)) * 5.0;
 }
 
 /**
@@ -56,7 +63,12 @@ void adc_begin_conversion(uint8_t channel)
  * Read the latest value converted by the ADC.
  *
  */
-uint16_t adc_get_latest_conversion_result()
+uint16_t adc_get_conversion_result(void)
 {
 	return ADC;
+}
+
+double adc_get_conversion_result_volts(void)
+{
+	return conversion_result_volts;
 }

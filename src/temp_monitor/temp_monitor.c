@@ -9,8 +9,10 @@
 #include "temp_data.h"
 #include "fault_status.h"
 #include "temp_monitor.h"
+#include "usart.h"
 #include "multiplex.h"
 #include <stdint.h>
+#include <stdio.h>
 
 static double coldest_temp, hottest_temp;
 static unsigned int coldest_index, hottest_index;
@@ -88,6 +90,20 @@ void temp_monitor_update(void)
 	}
 
 
+}
+
+void temp_monitor_1Hz(void)
+{
+	temp_monitor_update();
+
+	unsigned int hottest_index, coldest_index;
+	double hottest_temp, coldest_temp;
+	temp_monitor_hottest(&hottest_temp, &hottest_index);
+	temp_monitor_coldest(&coldest_temp, &coldest_index);
+
+	char buf[100];
+	sprintf(buf, "Hottest is #%d at %lf deg C\nColdest is #%d at %lf deg C\n", hottest_index, hottest_temp, coldest_index, coldest_temp);
+	usart_0_print_string(buf);
 }
 
 void temp_monitor_hottest(double* temp, unsigned int* index)

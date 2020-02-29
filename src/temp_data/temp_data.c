@@ -9,7 +9,9 @@
 #include <queue.h>
 #include <semphr.h>
 #include <portable.h>
+#include "adc.h"
 #include "temp_data.h"
+#include "thermistor.h"
 #include "multiplex.h"
 #include "common_macros.h"
 
@@ -28,6 +30,12 @@ void temp_data_init(void)
 	}
 
 	temp_data_mutex = xSemaphoreCreateMutex();
+}
+
+void temp_data_sample_procedure(void)
+{
+	double deg_c = thermistor_volts_to_deg_c(adc_get_conversion_result_volts());
+    temp_data_update(multiplex_get_selected(), deg_c);
 }
 
 void temp_data_update(uint8_t index, double temp)

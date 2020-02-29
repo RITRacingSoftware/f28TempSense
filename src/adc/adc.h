@@ -12,10 +12,14 @@
 
 #define MAX_ADC_VALUE 1023
 
-void adc_init();
+void adc_init(void);
+
+void adc_sample_procedure(void);
 
 void adc_begin_conversion(uint8_t channel);
 
-uint16_t adc_get_latest_conversion_result();
+uint16_t adc_get_conversion_result();
+
+double adc_get_conversion_result_volts(void);
 
 #endif /* ADC_H */

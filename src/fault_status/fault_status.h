@@ -17,4 +17,6 @@ void fault_status_set_therm_irrational(void);
 void fault_status_clear_therm_overtemp(void);
 void fault_status_clear_therm_irrational(void);
 
+void fault_status_1Hz(void);
+
 #endif /* FAULT_STATUS_H */

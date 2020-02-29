@@ -11,6 +11,7 @@
 #include <stdint.h>
 
 void temp_data_init(void);
+void temp_data_sample_procedure(void);
 void temp_data_update(uint8_t index, double temp);
 double temp_data_get(uint8_t index);
 

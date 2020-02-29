@@ -9,6 +9,7 @@
 #include "ioport.h"
 #include "usart.h"
 #include "adc.h"
+#include "fault_status.h"
 #include "multiplex.h"
 #include "thermistor.h"
 #include "temp_data.h"
@@ -39,7 +40,7 @@ void sample_task(void *pvParameters)
 {
 	adc_semaphore = xSemaphoreCreateBinary();
 	adc_begin_conversion(0);
-	static uint8_t selected_thermistor = 0;
+//	static uint8_t selected_thermistor = 0;
 	usart_0_print_string("Sample Task Start!\n");
 
 	for(;;)
@@ -47,76 +48,31 @@ void sample_task(void *pvParameters)
 		// block until the adc ISR has fired
 		xSemaphoreTake(adc_semaphore, portMAX_DELAY);
 
-		uint16_t latest_adc_reading = adc_get_latest_conversion_result();
-		double volts = ((double)latest_adc_reading/((float)MAX_ADC_VALUE)) * 5.0;
-
-		double deg_c = thermistor_volts_to_deg_c(volts);
-		temp_data_update(selected_thermistor, deg_c);
-
-//		char str[50];
-//		sprintf(str, "thermistor %d: %lf volts: %lf adc: %d\n", selected_thermistor, deg_c, volts, latest_adc_reading);
-//		usart_0_print_string(str);
-
-		selected_thermistor = (selected_thermistor + 1) % NUM_THERM;
-		if (selected_thermistor == 24)
-		{
-			selected_thermistor = 0;
-		}
-
-		uint8_t cluster = selected_thermistor / 8;
-		multiplex_select_thermistor(cluster, selected_thermistor - (cluster * 8));
-		vTaskDelay(20); // delay to let mux propagate
-
-		uint8_t adc_channel;
-		switch(cluster)
-		{
-			case 0:
-				adc_channel = 3;
-				break;
-			case 1:
-				adc_channel = 2;
-				break;
-			case 2:
-				adc_channel = 1;
-				break;
-		}
-		adc_begin_conversion(adc_channel);
+		adc_sample_procedure();
+		temp_data_sample_procedure();
+		multiplex_sample_procedure();
 	}
 }
 
-#define MONITOR_TASK_NAME ((signed char *) "MONITOR")
-#define MONITOR_TASK_PERIOD 1000
-#define MONITOR_TASK_STACK_SIZE 256
-#define MONITOR_TASK_PRIORITY (tskIDLE_PRIORITY + 1)
+#define PERIODIC_1HZ_TASK_NAME ((signed char *) "Periodic 1Hz")
+#define PERIODIC_1HZ_TASK_PERIOD 1000
+#define PERIODIC_1HZ_TASK_STACK_SIZE 256
+#define PERIODIC_1HZ_TASK_PRIORITY (tskIDLE_PRIORITY + 1)
 
-void monitor_task(void *pvParameters)
+void periodic_1Hz(void *pvParameters)
 {
 	portTickType xLastWakeTime;
-	const portTickType xPeriod = MONITOR_TASK_PERIOD;
+	const portTickType xPeriod = PERIODIC_1HZ_TASK_PERIOD;
 	xLastWakeTime = xTaskGetTickCount();
 
-	usart_0_print_string("Monitor Task Start!\n");
+	usart_0_print_string("1Hz Task Start!\n");
 
 	for(;;)
 	{
-		temp_monitor_update();
-
-		unsigned int hottest_index, coldest_index;
-		double hottest_temp, coldest_temp;
-		temp_monitor_hottest(&hottest_temp, &hottest_index);
-		temp_monitor_coldest(&coldest_temp, &coldest_index);
-
-		char buf[100];
-		sprintf(buf, "Hottest is #%d at %lf deg C\nColdest is #%d at %lf deg C\n", hottest_index, hottest_temp, coldest_index, coldest_temp);
-		usart_0_print_string(buf);
+		temp_monitor_1Hz();
+		fault_status_1Hz();
 
 		vTaskDelayUntil(&xLastWakeTime, xPeriod);
-		static int i = 0;
-		if (i == 0)
-			shutdown_control_trigger_shutdown();
-		else
-			shutdown_control_clear_shutdown();
-		i ^= 1;
 	}
 }
 
@@ -132,7 +88,7 @@ int main(int argc, char **argv)
 	usart_0_print_string("Device Initialization Complete!\n");
 
 	xTaskCreate(sample_task, SAMPLE_TASK_NAME, SAMPLE_TASK_STACK_SIZE, NULL, SAMPLE_TASK_PRIORITY, NULL);
-	xTaskCreate(monitor_task, MONITOR_TASK_NAME, MONITOR_TASK_STACK_SIZE, NULL, MONITOR_TASK_PRIORITY, NULL);
+	xTaskCreate(periodic_1Hz, PERIODIC_1HZ_TASK_NAME, PERIODIC_1HZ_TASK_STACK_SIZE, NULL, PERIODIC_1HZ_TASK_PRIORITY, NULL);
 
 	vTaskStartScheduler();
 	return 0;

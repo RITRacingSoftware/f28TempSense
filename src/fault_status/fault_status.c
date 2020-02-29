@@ -5,6 +5,7 @@
  *      Author: chrisblust
  */
 #include "fault_status.h"
+#include "shutdown_control.h"
 
 static int overtemp = 0;
 static int irrational = 0;
@@ -36,4 +37,16 @@ void fault_status_clear_therm_overtemp(void)
 void fault_status_clear_therm_irrational(void)
 {
 	irrational = 0;
+}
+
+void fault_status_1Hz(void)
+{
+	if (fault_status_get_irrational() || fault_status_get_overtemp())
+	{
+		shutdown_control_trigger_shutdown();
+	}
+	else
+	{
+		shutdown_control_clear_shutdown();
+	}
 }
