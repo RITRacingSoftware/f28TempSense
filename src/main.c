@@ -8,6 +8,8 @@
 #include "../inc/projdefs.h"
 #include "ioport.h"
 #include "usart.h"
+#include "can.h"
+#include "can_data.h"
 #include "adc.h"
 #include "fault_status.h"
 #include "multiplex.h"
@@ -57,7 +59,7 @@ void sample_task(void *pvParameters)
 #define PERIODIC_1HZ_TASK_NAME ((signed char *) "Periodic 1Hz")
 #define PERIODIC_1HZ_TASK_PERIOD 1000
 #define PERIODIC_1HZ_TASK_STACK_SIZE 256
-#define PERIODIC_1HZ_TASK_PRIORITY (tskIDLE_PRIORITY + 1)
+#define PERIODIC_1HZ_TASK_PRIORITY (tskIDLE_PRIORITY + 2)
 
 void periodic_1Hz(void *pvParameters)
 {
@@ -71,6 +73,7 @@ void periodic_1Hz(void *pvParameters)
 	{
 		temp_monitor_1Hz();
 		fault_status_1Hz();
+		can_data_1Hz();
 
 		vTaskDelayUntil(&xLastWakeTime, xPeriod);
 	}
@@ -79,6 +82,7 @@ void periodic_1Hz(void *pvParameters)
 int main(int argc, char **argv)
 {
 	adc_init();
+	initCAN();
 	multiplex_init();
 	temp_data_init();
 	shutdown_control_init();

@@ -7,7 +7,7 @@ CC = /usr/local/CrossPack-AVR/bin/avr-gcc
 
 OBJCOPY = /usr/local/CrossPack-AVR/bin/avr-objcopy
 
-MODULE_NAMES = adc ioport usart multiplex sn74lv4051a thermistor temp_data temp_monitor fault_status shutdown_control config
+MODULE_NAMES = adc ioport usart multiplex sn74lv4051a thermistor temp_data temp_monitor fault_status shutdown_control config temp_monitor_dbc can can_data
 MODULES = $(foreach n, $(MODULE_NAMES), $(SRC)$n/)
 
 INCLUDE_DIRS = $(MODULES) $(INC)
@@ -27,7 +27,7 @@ CFLAGS += -u
 CFLAGS += vfprintf
 CFLAGS += -lprintf_flt
 
-C_DEFINES = GCC_MEGA_AVR F_CPU=8000000
+C_DEFINES = GCC_MEGA_AVR F_CPU=8000000UL CAN_BAUDRATE=1000
 C_DEFINE_PARAMS = $(foreach d, $(C_DEFINES), -D$d)
 
 all:	at90.hex

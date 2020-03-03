@@ -1,0 +1,74 @@
+VERSION ""
+
+NS_ : 
+	NS_DESC_
+	CM_
+	BA_DEF_
+	BA_
+	VAL_
+	CAT_DEF_
+	CAT_
+	FILTER
+	BA_DEF_DEF_
+	EV_DATA_
+	ENVVAR_DATA_
+	SGTYPE_
+	SGTYPE_VAL_
+	BA_DEF_SGTYPE_
+	BA_SGTYPE_
+	SIG_TYPE_REF_
+	VAL_TABLE_
+	SIG_GROUP_
+	SIG_VALTYPE_
+	SIGTYPE_VALTYPE_
+
+BS_:
+
+BU_: TempMonitor
+
+BO_ 1234 TMStatus: 8 TempMonitor
+ SG_ TMStatus_Irrational : 0|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ TMStatus_Overtemp : 1|1@1+ (1,0) [0|1] "" Vector__XXX
+ SG_ TMStatus_ConfigIrrationalEn : 2|1@1+ (1,0) [0|1] "" Vector_XXX
+ SG_ TMStatus_ConfigOvertempEn : 3|1@1+ (1,0) [0|1] "" Vector_XXX
+ SG_ TMStatus_HottestIndex : 8|8@1+ (1,0) [0|23] "" Vector__XXX
+ SG_ TMStatus_HottestTemp : 16|10@1+ (0.1,0) [0|0] "" Vector__XXX
+ SG_ TMStatus_ColdestIndex : 32|8@1+ (1,0) [0|23] "" Vector__XXX
+ SG_ TMStatus_ColdestTemp : 40|10@1+ (0.1,0) [0|0] "" Vector__XXX
+
+
+BO_ 1235 TMSegment0: 5 TempMonitor
+ SG_ TMSegment0_T0Temp : 0|10@1+ (0.1,0) [0|0] "" Vector__XXX
+ SG_ TMSegment0_T1Temp : 10|10@1+ (0.1,0) [0|0] "" Vector__XXX
+ SG_ TMSegment0_T2Temp : 20|10@1+ (0.1,0) [0|0] "" Vector__XXX
+ SG_ TMSegment0_T3Temp : 30|10@1+ (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 1236 TMSegment1: 5 TempMonitor
+ SG_ TMSegment1_T4Temp : 0|10@1+ (0.1,0) [0|0] "" Vector__XXX
+ SG_ TMSegment1_T5Temp : 10|10@1+ (0.1,0) [0|0] "" Vector__XXX
+ SG_ TMSegment1_T6Temp : 20|10@1+ (0.1,0) [0|0] "" Vector__XXX
+ SG_ TMSegment1_T7Temp : 30|10@1+ (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 1237 TMSegment2: 5 TempMonitor
+ SG_ TMSegment2_T8Temp : 0|10@1+ (0.1,0) [0|0] "" Vector__XXX
+ SG_ TMSegment2_T9Temp : 10|10@1+ (0.1,0) [0|0] "" Vector__XXX
+ SG_ TMSegment2_T10Temp : 20|10@1+ (0.1,0) [0|0] "" Vector__XXX
+ SG_ TMSegment2_T11Temp : 30|10@1+ (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 1238 TMSegment3: 5 TempMonitor
+ SG_ TMSegment3_T12Temp : 0|10@1+ (0.1,0) [0|0] "" Vector__XXX
+ SG_ TMSegment3_T13Temp : 10|10@1+ (0.1,0) [0|0] "" Vector__XXX
+ SG_ TMSegment3_T14Temp : 20|10@1+ (0.1,0) [0|0] "" Vector__XXX
+ SG_ TMSegment3_T15Temp : 30|10@1+ (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 1239 TMSegment4: 5 TempMonitor
+ SG_ TMSegment4_T16Temp : 0|10@1+ (0.1,0) [0|0] "" Vector__XXX
+ SG_ TMSegment4_T17Temp : 10|10@1+ (0.1,0) [0|0] "" Vector__XXX
+ SG_ TMSegment4_T18Temp : 20|10@1+ (0.1,0) [0|0] "" Vector__XXX
+ SG_ TMSegment4_T19Temp : 30|10@1+ (0.1,0) [0|0] "" Vector__XXX
+
+BO_ 1240 TMSegment5: 5 TempMonitor
+ SG_ TMSegment5_T20Temp : 0|10@1+ (0.1,0) [0|0] "" Vector__XXX
+ SG_ TMSegment5_T21Temp : 10|10@1+ (0.1,0) [0|0] "" Vector__XXX
+ SG_ TMSegment5_T22Temp : 20|10@1+ (0.1,0) [0|0] "" Vector__XXX
+ SG_ TMSegment5_T23Temp : 30|10@1+ (0.1,0) [0|0] "" Vector__XXX
