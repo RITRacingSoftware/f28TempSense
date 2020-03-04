@@ -60,11 +60,11 @@ typedef struct
 void initCAN();
 
 CANErrorStatus getLastCANError();
-
+#ifdef CAN_RX_EN
 uint8_t listenForMessage( uint16_t id, uint8_t expectedLength );
 
 uint8_t getMessage( CANMessage * message );
-
+#endif
 uint8_t sendCAN( CANMessage* message );
 
 #endif // CAN_H

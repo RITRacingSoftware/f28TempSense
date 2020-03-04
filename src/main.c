@@ -16,6 +16,7 @@
 #include "thermistor.h"
 #include "temp_data.h"
 #include "temp_monitor.h"
+#include "temp_monitor_dbc.h"
 #include "shutdown_control.h"
 
 SemaphoreHandle_t adc_semaphore = NULL;
@@ -89,9 +90,15 @@ int main(int argc, char **argv)
 
 	usart_0_init(1,0);
 
+	int b = sizeof(can_obj_temp_monitor_dbc_h_t);
+	char buf[50];
+	sprintf(buf,"can thingy size: %d\n", b);
+	usart_0_print_string(buf);
 	usart_0_print_string("Device Initialization Complete!\n");
 
 	xTaskCreate(sample_task, SAMPLE_TASK_NAME, SAMPLE_TASK_STACK_SIZE, NULL, SAMPLE_TASK_PRIORITY, NULL);
+	usart_0_print_string("Created Sample Task\n");
+
 	xTaskCreate(periodic_1Hz, PERIODIC_1HZ_TASK_NAME, PERIODIC_1HZ_TASK_STACK_SIZE, NULL, PERIODIC_1HZ_TASK_PRIORITY, NULL);
 
 	vTaskStartScheduler();

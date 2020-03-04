@@ -26,6 +26,8 @@ CFLAGS += -lm
 CFLAGS += -u
 CFLAGS += vfprintf
 CFLAGS += -lprintf_flt
+CFLAGS += -Xlinker
+CFLAGS += -Map=output.map 
 
 C_DEFINES = GCC_MEGA_AVR F_CPU=8000000UL CAN_BAUDRATE=1000
 C_DEFINE_PARAMS = $(foreach d, $(C_DEFINES), -D$d)

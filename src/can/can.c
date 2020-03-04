@@ -5,6 +5,7 @@
 #include <avr/io.h>
 
 // Where the CAN ISR writes received messages to
+#ifdef CAN_RX_EN
 CANMessage messageBuffer[ MESSAGE_BUFFER_LENGTH ];
 
 // Index of the next index in the buffer to service
@@ -12,7 +13,7 @@ uint8_t serviceIndex = 0;
 
 // Next available buffer index
 uint8_t bufIndex = 0;
-
+#endif
 // Indicates any errors received on the bus.
 uint8_t lastError = 0;
 
@@ -45,8 +46,9 @@ void initCAN()
 	// Clear all interrupt flags
 	CANGIT = 0;
 
+	// *not using CAN interrupts for this implementation*
 	// Enable CAN interrupts, Transmit interrupt
-	CANGIE = (1 << ENIT) | (1 << ENTX) | (1 << ENRX);
+	//CANGIE = (1 << ENIT) | (1 << ENTX) | (1 << ENRX);
 
 	// Activate the CAN Controller
 	CANGCON |= ( 1 << ENASTB );
@@ -160,7 +162,7 @@ uint8_t sendCAN( CANMessage* message )
 
 	return 1;
 }
-
+#ifdef CAN_RX_EN
 /*
  * Configure a MOb to listen indefinitely for a CAN message with the provided id.
  * Messages read are written to the buffer.
@@ -242,3 +244,4 @@ uint8_t getMessage( CANMessage * message )
 
 	return messageAvailable;
 }
+#endif
