@@ -18,6 +18,7 @@
 #include "temp_monitor.h"
 #include "temp_monitor_dbc.h"
 #include "shutdown_control.h"
+#include "watchdog.h"
 
 SemaphoreHandle_t adc_semaphore = NULL;
 ISR(ADC_vect)
@@ -62,7 +63,7 @@ void sample_task(void *pvParameters)
 #define PERIODIC_1HZ_TASK_STACK_SIZE 256
 #define PERIODIC_1HZ_TASK_PRIORITY (tskIDLE_PRIORITY + 2)
 
-void periodic_1Hz(void *pvParameters)
+void periodic_1Hz_task(void *pvParameters)
 {
 	portTickType xLastWakeTime;
 	const portTickType xPeriod = PERIODIC_1HZ_TASK_PERIOD;
@@ -80,8 +81,29 @@ void periodic_1Hz(void *pvParameters)
 	}
 }
 
+#define WATCHDOG_TASK_NAME ((signed char *) "Watchdog")
+#define WATCHDOG_TASK_PERIOD 250
+#define WATCHDOG_TASK_STACK_SIZE 50
+#define WATCHDOG_TASK_PRIORITY (tskIDLE_PRIORITY + 2)
+void watchdog_task(void *pvParameters)
+{
+	portTickType xLastWakeTime;
+	const portTickType xPeriod = WATCHDOG_TASK_PERIOD;
+	xLastWakeTime = xTaskGetTickCount();
+
+	usart_0_print_string("Watchdog Task Start\n");
+
+	for(;;)
+	{
+		watchdog_pet();
+
+		vTaskDelayUntil(&xLastWakeTime, xPeriod);
+	}
+}
+
 int main(int argc, char **argv)
 {
+	watchdog_init();
 	adc_init();
 	initCAN();
 	multiplex_init();
@@ -90,16 +112,12 @@ int main(int argc, char **argv)
 
 	usart_0_init(1,0);
 
-	int b = sizeof(can_obj_temp_monitor_dbc_h_t);
-	char buf[50];
-	sprintf(buf,"can thingy size: %d\n", b);
-	usart_0_print_string(buf);
 	usart_0_print_string("Device Initialization Complete!\n");
 
 	xTaskCreate(sample_task, SAMPLE_TASK_NAME, SAMPLE_TASK_STACK_SIZE, NULL, SAMPLE_TASK_PRIORITY, NULL);
-	usart_0_print_string("Created Sample Task\n");
+	xTaskCreate(periodic_1Hz_task, PERIODIC_1HZ_TASK_NAME, PERIODIC_1HZ_TASK_STACK_SIZE, NULL, PERIODIC_1HZ_TASK_PRIORITY, NULL);
+	xTaskCreate(watchdog_task, WATCHDOG_TASK_NAME, WATCHDOG_TASK_STACK_SIZE, NULL, WATCHDOG_TASK_PRIORITY, NULL);
 
-	xTaskCreate(periodic_1Hz, PERIODIC_1HZ_TASK_NAME, PERIODIC_1HZ_TASK_STACK_SIZE, NULL, PERIODIC_1HZ_TASK_PRIORITY, NULL);
 
 	vTaskStartScheduler();
 	return 0;
