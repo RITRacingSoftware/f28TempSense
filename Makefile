@@ -2,23 +2,16 @@ PROJECT_ROOT = $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 SRC = $(PROJECT_ROOT)src/
 INC = $(PROJECT_ROOT)inc/
 
-CXX = /usr/local/CrossPack-AVR/bin/avr-gcc
-CC = /usr/local/CrossPack-AVR/bin/avr-gcc
+CXX = avr-gcc
+CC = avr-gcc
 
-OBJCOPY = /usr/local/CrossPack-AVR/bin/avr-objcopy
+OBJCOPY = avr-objcopy
 
 MODULE_NAMES = adc ioport usart multiplex sn74lv4051a thermistor temp_data temp_monitor fault_status shutdown_control config temp_monitor_dbc can can_data watchdog task_watchdog reset_handler
 MODULES = $(foreach n, $(MODULE_NAMES), $(SRC)$n/)
 
 INCLUDE_DIRS = $(MODULES) $(INC)
 INC_PARAMS=$(foreach d, $(INCLUDE_DIRS), -I$d)
-ifeq ($(BUILD_MODE),debug)
-	CFLAGS += -g
-else ifeq ($(BUILD_MODE),run)
-	CFLAGS += -Os
-else
-	$(error Build mode $(BUILD_MODE) not supported by this Makefile)
-endif
 
 CFLAGS += -mmcu=at90can128
 CFLAGS += --std=gnu99
