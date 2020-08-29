@@ -31,7 +31,7 @@ at90.hex: at90.elf
 	$(OBJCOPY) -O ihex -j .text -j .data at90.elf at90.hex
 
 at90.elf: *.o
-	$(CC) -mmcu=at90can128 $^ -o $@ $(CFLAGS)
+	$(CC) -mmcu=at90can128 *.o -o $@ $(CFLAGS)
 
 *.o: $(wildcard $(SRC)*.c) $(foreach n, $(MODULES), $(wildcard $n*.c)) $(SRC)portable/gcc/atmega323/port.c $(SRC)portable/mem_man/heap_1.c
 	$(CC) -c $(CFLAGS) $(C_DEFINE_PARAMS) $(INC_PARAMS) $^

@@ -49,7 +49,7 @@ projects should not use them. */
 #endif
 
 #ifdef GCC_MEGA_AVR
-	#include "../portable/GCC/ATMega323/portmacro.h"
+	#include "../portable/gcc/atmega323/portmacro.h"
 #endif
 
 #ifdef IAR_MEGA_AVR
