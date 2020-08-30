@@ -7,4 +7,10 @@ pipeline {
             }
         }
     }
+
+    post {
+        always {
+            archiveArtifacts artifacts: 'at90.hex'
+        }
+    }
 }
