@@ -1,6 +1,7 @@
 PROJECT_ROOT = $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 SRC = $(PROJECT_ROOT)src/
 INC = $(PROJECT_ROOT)inc/
+BIN = $(PROJECT_ROOT)bin/
 
 CXX = avr-gcc
 CC = avr-gcc
@@ -28,13 +29,16 @@ C_DEFINE_PARAMS = $(foreach d, $(C_DEFINES), -D$d)
 all:	at90.hex
 
 at90.hex: at90.elf
-	$(OBJCOPY) -O ihex -j .text -j .data at90.elf at90.hex
+	$(OBJCOPY) -O ihex -j .text -j .data $(BIN)at90.elf $(BIN)at90.hex
+	rm *.o
 
 at90.elf: *.o
-	$(CC) -mmcu=at90can128 *.o -o $@ $(CFLAGS)
+	-mkdir $(BIN)
+	$(CC) -mmcu=at90can128 *.o -o $(BIN)$@ $(CFLAGS)
 
 *.o: $(wildcard $(SRC)*.c) $(foreach n, $(MODULES), $(wildcard $n*.c)) $(SRC)portable/gcc/atmega323/port.c $(SRC)portable/mem_man/heap_1.c
 	$(CC) -c $(CFLAGS) $(C_DEFINE_PARAMS) $(INC_PARAMS) $^
 
 clean:
-	rm -fr *.hex *.elf *.o
+	-rm -fr $(BIN)*.hex $(BIN)*.elf *.o
+	-rm -r $(BIN)
