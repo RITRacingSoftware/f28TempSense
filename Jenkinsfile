@@ -10,7 +10,7 @@ pipeline {
 
     post {
         always {
-            archiveArtifacts artifacts: 'at90.hex'
+            archiveArtifacts artifacts: 'bin/at90.hex'
         }
     }
 }
