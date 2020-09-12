@@ -102,7 +102,7 @@ void temp_monitor_1Hz(void)
 	temp_monitor_coldest(&coldest_temp, &coldest_index);
 
 	char buf[100];
-	sprintf(buf, "Hottest is #%d at %lf deg C\nColdest is #%d at %lf deg C\n", hottest_index, hottest_temp, coldest_index, coldest_temp);
+	sprintf(buf, "Hottest is #%d at %lf deg C\r\nColdest is #%d at %lf deg C\r\n", hottest_index, hottest_temp, coldest_index, coldest_temp);
 	usart_0_print_string(buf);
 }
 

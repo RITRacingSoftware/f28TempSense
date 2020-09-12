@@ -94,7 +94,7 @@ void watchdog_task(void *pvParameters)
 	xLastWakeTime = xTaskGetTickCount();
 	static uint64_t counter;
 	//usart_0_print_string("Watchdog Task Start\n");
-
+	watchdog_init();
 	for(;;)
 	{
 		if (!task_watchdog_expired())
@@ -148,7 +148,7 @@ void transmit_reset_source(reset_source_E source)
 int main(int argc, char **argv)
 {
 
-	watchdog_init();
+	
 	adc_init();
 	initCAN();
 	multiplex_init();
@@ -160,7 +160,7 @@ int main(int argc, char **argv)
 	reset_source_E reset_source = reset_handler_get_source();
 
 	transmit_reset_source(reset_source);
-
+	
 	xTaskCreate(sample_task, SAMPLE_TASK_NAME, SAMPLE_TASK_STACK_SIZE, NULL, SAMPLE_TASK_PRIORITY, NULL);
 	xTaskCreate(periodic_1Hz_task, PERIODIC_1HZ_TASK_NAME, PERIODIC_1HZ_TASK_STACK_SIZE, NULL, PERIODIC_1HZ_TASK_PRIORITY, NULL);
 	xTaskCreate(watchdog_task, WATCHDOG_TASK_NAME, WATCHDOG_TASK_STACK_SIZE, NULL, WATCHDOG_TASK_PRIORITY, NULL);
